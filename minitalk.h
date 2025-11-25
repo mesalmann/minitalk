@@ -23,6 +23,6 @@ int		ft_atoi(const char *str);
 void	ft_putnbr(int n);
 void	print_pid(void);
 void	setup_signals(void);
-void	print_bit(int sig);
+void	print_bit(int sig, siginfo_t *info, void *context);
 
 #endif

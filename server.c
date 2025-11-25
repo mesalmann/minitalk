@@ -12,11 +12,12 @@
 
 #include "minitalk.h"
 
-void	print_bit(int sig)
+void	print_bit(int sig, siginfo_t *info, void *context)
 {
 	static unsigned char	c = 0;
 	static int				bit = 0;
 
+	(void)context;
 	if (sig == SIGUSR1)
 		c |= 1 << (7 - bit);
 	bit++;
@@ -29,15 +30,17 @@ void	print_bit(int sig)
 		bit = 0;
 		c = 0;
 	}
+	if (info && info->si_pid != 0)
+		kill(info->si_pid, SIGUSR1);
 }
 
 void	setup_signals(void)
 {
 	struct sigaction	sa;
 
-	sa.sa_handler = &print_bit;
 	sigemptyset(&sa.sa_mask);
-	sa.sa_flags = 0;
+	sa.sa_flags = SA_SIGINFO;
+	sa.sa_sigaction = &print_bit;
 	if (sigaction(SIGUSR1, &sa, NULL) == -1
 		|| sigaction(SIGUSR2, &sa, NULL) == -1)
 	{
