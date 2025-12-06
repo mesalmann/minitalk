@@ -5,12 +5,12 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: mesalman <mesalman@student.42istanbul.com  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/12/06 13:28:04 by mesalman          #+#    #+#             */
-/*   Updated: 2025/12/06 14:03:06 by mesalman         ###   ########.fr       */
+/*   Created: 2025/11/06 12:12:18 by mesalman          #+#    #+#             */
+/*   Updated: 2025/11/27 13:23:11 by mesalman         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "minitalk.h"
+#include "minitalk_bonus.h"
 
 static volatile sig_atomic_t	g_ack = 0;
 
@@ -20,7 +20,7 @@ static void	ack_handler(int sig)
 	g_ack = 1;
 }
 
-static void	send_byte(int pid, unsigned char c)
+static void	send_byte(pid_t pid, unsigned char c)
 {
 	int	bit;
 
@@ -40,7 +40,7 @@ static void	send_byte(int pid, unsigned char c)
 
 int	main(int ac, char **av)
 {
-	int					pid;
+	pid_t				pid;
 	int					i;
 	struct sigaction	sa;
 
@@ -50,7 +50,7 @@ int	main(int ac, char **av)
 	if (kill(pid, 0) == -1)
 		return (write(2, "Invalid PID\n", 12), 1);
 	sigemptyset(&sa.sa_mask);
-	sa.sa_flags = 0;
+	sa.sa_flags = SA_RESTART;
 	sa.sa_handler = ack_handler;
 	sigaction(SIGUSR1, &sa, NULL);
 	i = 0;
@@ -60,5 +60,6 @@ int	main(int ac, char **av)
 		i++;
 	}
 	send_byte(pid, 0);
+	write(1, "Message sent!\n", 14);
 	return (0);
 }
